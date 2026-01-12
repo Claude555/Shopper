@@ -1,13 +1,19 @@
 'use client';
-import { dynamic } from 'next/dynamic';
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation'; // Correct hook for ?category=
 import ProductCard from '@/components/product/ProductCard';
 
 export const dynamic = 'force-dynamic';
 
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+}
+
 function AllProductsContent() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
 
@@ -19,12 +25,19 @@ function AllProductsContent() {
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const mapped = data.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          price: item.selling_price,
-          image: `http://127.0.0.1:8000/storage/${item.image}`,
-        }));
+        const mapped = data.map(
+          (item: {
+            id: number;
+            title: string;
+            selling_price: number;
+            image: string;
+          }) => ({
+            id: item.id,
+            title: item.title,
+            price: item.selling_price,
+            image: `http://127.0.0.1:8000/storage/${item.image}`,
+          })
+        );
         setProducts(mapped);
       });
   }, [category]);
@@ -35,7 +48,7 @@ function AllProductsContent() {
         All Nairobi Inventory
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {products.map((p: any) => (
+        {products.map((p: Product) => (
           <ProductCard key={p.id} {...p} />
         ))}
       </div>
