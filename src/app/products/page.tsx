@@ -17,30 +17,35 @@ function AllProductsContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
 
-  useEffect(() => {
-    const url = category
-      ? `http://127.0.0.1:8000/api/products?category=${category}`
-      : 'http://127.0.0.1:8000/api/products';
+useEffect(() => {
+  // Use the Environment Variable set in Vercel/Local
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        const mapped = data.map(
-          (item: {
-            id: number;
-            title: string;
-            selling_price: number;
-            image: string;
-          }) => ({
-            id: item.id,
-            title: item.title,
-            price: item.selling_price,
-            image: `http://127.0.0.1:8000/storage/${item.image}`,
-          })
-        );
-        setProducts(mapped);
-      });
-  }, [category]);
+  const url = category
+    ? `${API_BASE}/api/products?category=${category}`
+    : `${API_BASE}/api/products`;
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      const mapped = data.map(
+        (item: {
+          id: number;
+          title: string;
+          selling_price: number;
+          image: string;
+        }) => ({
+          id: item.id,
+          title: item.title,
+          price: item.selling_price,
+          // Dynamically link to the Render storage folder
+          image: `${API_BASE}/storage/${item.image}`,
+        })
+      );
+      setProducts(mapped);
+    })
+    .catch(err => console.error("Fetch error:", err));
+}, [category]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
